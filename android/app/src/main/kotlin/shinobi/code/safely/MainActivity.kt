@@ -29,9 +29,14 @@ class MainActivity : FlutterActivity() {
         GeneratedPluginRegistrant.registerWith(this)
     }
 
+    override fun onStop() {
+        super.onStop()
+        startService(Intent(this, TheService::class.java))
+    }
+
     override fun onResume() {
         super.onResume()
-        startService(Intent(this, TheService::class.java))
+        stopService(Intent(this, TheService::class.java))
     }
 }
 
@@ -95,7 +100,10 @@ class TheService : Service(), SensorEventListener {
     override fun onDestroy() {
         unregisterReceiver(receiver)
         unregisterListener()
-        wakeLock?.release()
+
+        if (wakeLock?.isHeld as Boolean)
+            wakeLock?.release()
+
         stopForeground(true)
     }
 
