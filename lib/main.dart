@@ -30,16 +30,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-//    try {
-//      channel.receiveBroadcastStream().listen((dynamic event) {
-//        print("Received event: $event");
-//      }, onError: (dynamic error){
-//        print("Received error: ${error.message}");
-//      }
-//      );
-//    } on PlatformException catch(e) {
-//      print("Platform error ${e.message}");
-//    }
     return Text("This shit works", style: TextStyle(color: Colors.blue),);
   }
 

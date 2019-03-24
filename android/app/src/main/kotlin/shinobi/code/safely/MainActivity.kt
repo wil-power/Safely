@@ -18,7 +18,8 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import io.flutter.app.FlutterActivity
-import io.flutter.plugin.common.EventChannel
+import com.github.nisrulz.sensey.Sensey
+import com.github.nisrulz.sensey.ShakeDetector
 import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity : FlutterActivity() {
@@ -27,6 +28,8 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GeneratedPluginRegistrant.registerWith(this)
+        Sensey.getInstance().init(applicationContext)
+        Log.e("SENSE:", "Sensey Instance created.")
     }
 
     override fun onStop() {
@@ -40,70 +43,39 @@ class MainActivity : FlutterActivity() {
     }
 }
 
-class StartCmServiceAtBootReceiver : BroadcastReceiver(){
-    companion object {
-        val TAG = StartCmServiceAtBootReceiver.javaClass.simpleName
-    }
-
-    override fun onReceive(context: Context?, intent: Intent?) {
-        Log.e(TAG, "Boot Detected")
-        if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
-            val mIntent = Intent(context, MainActivity::class.java)
-            mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context?.startActivity(mIntent)
-        }
-    }
-
-}
 
 @TargetApi(11)
-class TheService : Service(), SensorEventListener {
+class TheService : Service() {
     val receiver = ScreenReceiver()
     companion object {
         val TAG = TheService::class.java.simpleName
     }
-    private var sensorManager: SensorManager? = null
     private var wakeLock: PowerManager.WakeLock? = null
-
-    // REGISTER THIS AS A SENSOR EVENT LISTENER
-    fun registerListener() {
-        sensorManager?.registerListener(
-            this,
-            sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-            SensorManager.SENSOR_DELAY_NORMAL
-        )
-    }
-
-
-    // UNREGISTER THIS AS A SENSOR EVENT LISTENER
-    fun unregisterListener(){
-        sensorManager?.unregisterListener(this)
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.e("Sensor", "OnAccuracyChanged()")
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        Log.e("Sensor", "OnSensorChanged()")
-    }
 
     override fun onCreate() {
         super.onCreate()
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        Sensey.getInstance().init(applicationContext)
         val manager = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Sensor:WakeLogTag")
         registerReceiver(receiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
 
     }
 
+    val shakeListener = object : ShakeDetector.ShakeListener{
+        override fun onShakeDetected() {
+            Log.e("SHAKE:::", "Hey I detected a shake event. Sensey rocks!")
+        }
+
+        override fun onShakeStopped() {
+            Log.e("SHAKESTOPPED:", "Hey I detected that the shake event has stopped. Sensey Rocks!")
+        }
+    }
+
     override fun onDestroy() {
         unregisterReceiver(receiver)
-        unregisterListener()
-
         if (wakeLock?.isHeld as Boolean)
             wakeLock?.release()
-
+        Sensey.getInstance().stopShakeDetection(shakeListener)
         stopForeground(true)
     }
 
@@ -114,11 +86,9 @@ class TheService : Service(), SensorEventListener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         startForeground(Process.myPid(), Notification())
-        registerListener()
         wakeLock?.acquire(100)
 
         return START_STICKY
-
     }
 
     inner class ScreenReceiver : BroadcastReceiver(){
@@ -129,10 +99,8 @@ class TheService : Service(), SensorEventListener {
 
             val runnable = Runnable {
                 Log.e("RUNNABLE", "Runnable Executing...")
-                unregisterListener()
-                registerListener()
+                Sensey.getInstance().startShakeDetection(shakeListener)
 //                startService(Intent(context, TheService::class.java))
-
             }
             Handler().postDelayed(runnable, 1000)
         }
