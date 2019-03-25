@@ -32,7 +32,4 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Text("This shit works", style: TextStyle(color: Colors.blue),);
   }
-
-
-
 }

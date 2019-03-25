@@ -1,6 +1,5 @@
 package shinobi.code.safely
 
-import android.annotation.TargetApi
 import android.app.Notification
 import android.os.Process
 import android.app.Service
@@ -8,10 +7,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -23,7 +18,6 @@ import com.github.nisrulz.sensey.ShakeDetector
 import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "safely.flutter.io/safely"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,13 +37,9 @@ class MainActivity : FlutterActivity() {
     }
 }
 
-
-@TargetApi(11)
 class TheService : Service() {
     val receiver = ScreenReceiver()
-    companion object {
-        val TAG = TheService::class.java.simpleName
-    }
+
     private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onCreate() {
@@ -100,9 +90,8 @@ class TheService : Service() {
             val runnable = Runnable {
                 Log.e("RUNNABLE", "Runnable Executing...")
                 Sensey.getInstance().startShakeDetection(shakeListener)
-//                startService(Intent(context, TheService::class.java))
             }
-            Handler().postDelayed(runnable, 1000)
+            Handler().postDelayed(runnable, 500)
         }
     }
 }
