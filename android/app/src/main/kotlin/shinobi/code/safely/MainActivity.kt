@@ -57,11 +57,10 @@ class TheService : Service() {
 
     val shakeListener = object : ShakeDetector.ShakeListener {
         override fun onShakeDetected() {
-            Log.e("SHAKE:::", "Hey I detected a shake event. Sensey rocks!")
+
         }
 
         override fun onShakeStopped() {
-            Log.e("SHAKESTOPPED:", "Hey I detected that the shake event has stopped. Sensey Rocks!")
         }
     }
 
@@ -87,15 +86,11 @@ class TheService : Service() {
 
     inner class ScreenReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.i("SCREEN_STATE", "OnReceive($intent)")
 
             if (intent?.action == Intent.ACTION_SCREEN_ON) {
-                Log.e("SCREEN_ON", "Screen is on.")
                 Sensey.getInstance().stopShakeDetection(shakeListener)
-                Log.e("SENSEY_STOPPED: ", "SENSEY STOPPED WHEN SCREEN CAME ON")
             } else if (intent?.action == Intent.ACTION_SCREEN_OFF) {
                 val runnable = Runnable {
-                    Log.e("RUNNABLE", "Runnable Executing...")
                     Sensey.getInstance().startShakeDetection(shakeListener)
                 }
                 Handler().postDelayed(runnable, 500)
