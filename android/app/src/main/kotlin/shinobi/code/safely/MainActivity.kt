@@ -17,6 +17,7 @@ import com.github.nisrulz.sensey.Sensey
 import com.github.nisrulz.sensey.ShakeDetector
 import io.flutter.plugins.GeneratedPluginRegistrant
 
+
 class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,11 +48,14 @@ class TheService : Service() {
         Sensey.getInstance().init(applicationContext)
         val manager = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Sensor:WakeLogTag")
-        registerReceiver(receiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
 
+        val screenStateFilter = IntentFilter()
+        screenStateFilter.addAction(Intent.ACTION_SCREEN_ON)
+        screenStateFilter.addAction(Intent.ACTION_SCREEN_OFF)
+        registerReceiver(receiver, screenStateFilter)
     }
 
-    val shakeListener = object : ShakeDetector.ShakeListener{
+    val shakeListener = object : ShakeDetector.ShakeListener {
         override fun onShakeDetected() {
             Log.e("SHAKE:::", "Hey I detected a shake event. Sensey rocks!")
         }
@@ -65,8 +69,8 @@ class TheService : Service() {
         unregisterReceiver(receiver)
         if (wakeLock?.isHeld as Boolean)
             wakeLock?.release()
-        Sensey.getInstance().stopShakeDetection(shakeListener)
         stopForeground(true)
+        stopSelf()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -81,17 +85,22 @@ class TheService : Service() {
         return START_STICKY
     }
 
-    inner class ScreenReceiver : BroadcastReceiver(){
+    inner class ScreenReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.i("SCREEN_STATE", "OnReceive($intent)")
 
-            if (intent?.action != Intent.ACTION_SCREEN_OFF) return
-
-            val runnable = Runnable {
-                Log.e("RUNNABLE", "Runnable Executing...")
-                Sensey.getInstance().startShakeDetection(shakeListener)
+            if (intent?.action == Intent.ACTION_SCREEN_ON) {
+                Log.e("SCREEN_ON", "Screen is on.")
+                Sensey.getInstance().stopShakeDetection(shakeListener)
+                Log.e("SENSEY_STOPPED: ", "SENSEY STOPPED WHEN SCREEN CAME ON")
+            } else if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                val runnable = Runnable {
+                    Log.e("RUNNABLE", "Runnable Executing...")
+                    Sensey.getInstance().startShakeDetection(shakeListener)
+                }
+                Handler().postDelayed(runnable, 500)
             }
-            Handler().postDelayed(runnable, 500)
+
         }
     }
 }

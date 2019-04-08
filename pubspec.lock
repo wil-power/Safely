@@ -36,13 +36,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
-  dropdown_menu:
+  easy_dialogs:
     dependency: "direct main"
     description:
-      name: dropdown_menu
+      name: easy_dialogs
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.1"
+    version: "1.0.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -151,4 +151,3 @@ packages:
     version: "2.0.8"
 sdks:
   dart: ">=2.1.0 <3.0.0"
-  flutter: ">=0.1.4 <3.0.0"
