@@ -1,30 +1,27 @@
 package shinobi.code.safely
 
 import android.app.Notification
-import android.os.Process
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
-import android.os.PowerManager
+import android.os.*
 import android.util.Log
 import io.flutter.app.FlutterActivity
 import com.github.nisrulz.sensey.Sensey
 import com.github.nisrulz.sensey.ShakeDetector
+import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 
 
 class MainActivity : FlutterActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GeneratedPluginRegistrant.registerWith(this)
         Sensey.getInstance().init(applicationContext)
         Log.e("SENSE:", "Sensey Instance created.")
+
     }
 
     override fun onStop() {
@@ -39,28 +36,35 @@ class MainActivity : FlutterActivity() {
 }
 
 class TheService : Service() {
-    val receiver = ScreenReceiver()
-
+    private val receiver = ScreenReceiver()
     private var wakeLock: PowerManager.WakeLock? = null
+    lateinit var vibrator: Vibrator
+
 
     override fun onCreate() {
         super.onCreate()
         Sensey.getInstance().init(applicationContext)
         val manager = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Sensor:WakeLogTag")
-
         val screenStateFilter = IntentFilter()
         screenStateFilter.addAction(Intent.ACTION_SCREEN_ON)
         screenStateFilter.addAction(Intent.ACTION_SCREEN_OFF)
         registerReceiver(receiver, screenStateFilter)
+
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
     }
 
     val shakeListener = object : ShakeDetector.ShakeListener {
         override fun onShakeDetected() {
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE))
+            else
+                vibrator.vibrate(1000)
         }
 
         override fun onShakeStopped() {
+
         }
     }
 
@@ -91,7 +95,7 @@ class TheService : Service() {
                 Sensey.getInstance().stopShakeDetection(shakeListener)
             } else if (intent?.action == Intent.ACTION_SCREEN_OFF) {
                 val runnable = Runnable {
-                    Sensey.getInstance().startShakeDetection(shakeListener)
+                    Sensey.getInstance().startShakeDetection(5f, 5000 ,shakeListener)
                 }
                 Handler().postDelayed(runnable, 500)
             }
