@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'src/screens/home_screen.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -29,8 +29,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const channel = EventChannel('foo');
-
   @override
   Widget build(BuildContext context) {
     return Text("This shit works", style: TextStyle(color: Colors.blue),);
