@@ -10,18 +10,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   double margin = 1.0;
-  List<String> listItems = [
-    "EarthGang",
-    "TDE",
-    "ROCAFELLA",
-    'ALBANIA',
-    'FOUR',
-    'FIVE',
-    'SIX',
-    'SEVEN',
-    'TEN',
-    'ELEVEN'
-  ];
   String selected;
   String durationSelected;
   bool takeOffstage = true;
