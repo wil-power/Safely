@@ -25,7 +25,7 @@ class _TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin
   void initState() {
     super.initState();
     animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 0, minutes: 0, hours: 1));
+        AnimationController(vsync: this, duration: Duration(seconds: 0, minutes: 1, hours: 0));
   }
 
   @override

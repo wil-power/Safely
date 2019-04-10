@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+            padding: const EdgeInsets.only(left: 8.0),
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             child: Padding(
@@ -42,16 +42,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: <Widget>[
                   // AppBar
                   Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
+                      padding: const EdgeInsets.only(top: 8.0),
                       child: _buildAppBar()),
                   SizedBox(
-                    height: 50.0,
+                    height: 70.0,
                   ),
                   _buildButtonToTriggerDialog(),
                   SizedBox(
                     height: 50.0,
                   ),
-                  _buildButtonToTriggerDuraationDialog(),
+                  _buildButtonToTriggerDurationDialog(),
                   SizedBox(
                     height: 50.0,
                   ),
@@ -70,27 +70,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAppBar() {
-    return Row(
-      children: <Widget>[
-        Container(
-          decoration: ShapeDecoration(
-            shape: CircleBorder(
-                side: BorderSide(
-              width: 4.0,
-              color: Colors.amber,
-            )),
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            decoration: ShapeDecoration(
+              shape: CircleBorder(
+                  side: BorderSide(
+                width: 4.0,
+                color: Colors.white70,
+              )),
+            ),
+            height: 50,
+            width: 50, 
+            child: Image.asset("assets/images/safely_logo.png"),
           ),
-          child: Text("LOGO"),
-        ),
-        SizedBox(
-          width: 300.0,
-        ),
-        Icon(
-          Icons.settings,
-          color: Colors.amberAccent[100],
-          size: 32.0,
-        ),
-      ],
+          SizedBox(
+            width: 280.0,
+          ),
+          IconButton(icon: Icon(
+            Icons.settings,
+            color: Colors.black54,
+            size: 30.0,
+          ),
+          onPressed: (){
+            print("Settings button pressed!");
+          },
+          ),
+
+        ],
+      ),
     );
   }
 
@@ -124,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildButtonToTriggerDuraationDialog() {
+  Widget _buildButtonToTriggerDurationDialog() {
     return RawMaterialButton(
       onPressed: () {
         _showDurationPickerDialog();

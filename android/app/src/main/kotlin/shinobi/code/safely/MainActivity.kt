@@ -137,9 +137,9 @@ class TheService : Service() {
         try {
             val smsManager = SmsManager.getDefault()
             smsManager.sendTextMessage(
-                "+233209050642",
+                "+233506153609",
                 null,
-                "This message was sent from Safely",
+                "This message was sent from Safely. :)",
                 null,
                 null
             )
