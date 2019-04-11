@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -13,7 +14,8 @@ class SplashScreenState extends State<SplashScreen> {
     // pause for a while then start the home screen
     var duration = Duration(seconds: 3);
     return Timer(duration, () {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.push(context, PageRouteBuilder(
+          transitionDuration: Duration(seconds: 2), pageBuilder: (_, __, ___) => HomeScreen()));
     });
   }
 
@@ -29,10 +31,13 @@ class SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Image.asset(
-          'assets/images/safely_logo.png',
-          width: 100.0,
-          height: 100.0,
+        child: Hero(
+          tag: "splash",
+          child: Image.asset(
+            'assets/images/safely_logo.png',
+            width: 100.0,
+            height: 100.0,
+          ),
         ),
       ),
     );
