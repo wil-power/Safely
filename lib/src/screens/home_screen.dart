@@ -17,43 +17,47 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.only(left: 8.0),
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: <Widget>[
-                  // AppBar
-                  Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: _buildAppBar()),
-                  SizedBox(
-                    height: 70.0,
-                  ),
-                  _buildButtonToTriggerDialog(),
-                  SizedBox(
-                    height: 50.0,
-                  ),
-                  _buildButtonToTriggerDurationDialog(),
-                  SizedBox(
-                    height: 50.0,
-                  ),
-                  _buildTextField(),
-                  SizedBox(
-                    height: 30.0,
-                  ),
-                  _buildStartTimerButton()
-                ],
-              ),
+    return Scaffold(
+      body: _buildHomeScreen(),
+    );
+  }
+
+  Widget _buildHomeScreen() {
+    return ListView(
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.only(left: 8.0),
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: <Widget>[
+                // AppBar
+                Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: _buildAppBar()),
+                SizedBox(
+                  height: 70.0,
+                ),
+                _buildButtonToTriggerDialog(),
+                SizedBox(
+                  height: 50.0,
+                ),
+                _buildButtonToTriggerDurationDialog(),
+                SizedBox(
+                  height: 50.0,
+                ),
+                _buildTextField(),
+                SizedBox(
+                  height: 30.0,
+                ),
+                _buildStartTimerButton()
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'src/screens/home_screen.dart';
+import 'src/screens/splash_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,8 +15,11 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
 //        resizeToAvoidBottomPadding: false,
-        body: HomeScreen(),
-      )
+        body: SplashScreen(),
+      ),
+      routes: <String, WidgetBuilder> {
+        '/home': (context) => HomeScreen()
+      },
     );
   }
 }
