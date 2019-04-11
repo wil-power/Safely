@@ -18,7 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     perm.requestPermissions();
   }
@@ -84,22 +83,25 @@ class _HomeScreenState extends State<HomeScreen> {
               )),
             ),
             height: 50,
-            width: 50, 
-            child: Image.asset("assets/images/safely_logo.png"),
+            width: 50,
+            child: Hero(
+                tag: "splash",
+                child: Image.asset("assets/images/safely_logo.png")),
           ),
-          SizedBox(
-            width: 280.0,
+//          SizedBox(
+//            width: 280.0,
+//          ),
+          Spacer(flex: 2,),
+          IconButton(
+            icon: Icon(
+              Icons.settings,
+              color: Colors.black54,
+              size: 30.0,
+            ),
+            onPressed: () {
+              print("Settings button pressed!");
+            },
           ),
-          IconButton(icon: Icon(
-            Icons.settings,
-            color: Colors.black54,
-            size: 30.0,
-          ),
-          onPressed: (){
-            print("Settings button pressed!");
-          },
-          ),
-
         ],
       ),
     );
