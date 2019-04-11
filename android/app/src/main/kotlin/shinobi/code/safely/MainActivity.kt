@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.location.LocationManager
 import android.os.*
 import android.telephony.SmsManager
 import android.util.Log
@@ -13,7 +14,6 @@ import io.flutter.app.FlutterActivity
 import com.github.nisrulz.sensey.Sensey
 import com.github.nisrulz.sensey.ShakeDetector
 import com.github.nisrulz.sensey.TouchTypeDetector
-import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 import java.lang.Exception
 
@@ -146,6 +146,12 @@ class TheService : Service() {
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
+    }
+
+    private fun getLongLat(context: Context) {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+//        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+
     }
 
     inner class ScreenReceiver : BroadcastReceiver() {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import "package:easy_dialogs/easy_dialogs.dart";
 import 'package:safely/src/screens/timer_screen.dart';
 import 'duration_dialog.dart';
+//import '../misc/permissions.dart' as perm;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -14,6 +15,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String durationSelected;
   bool takeOffstage = true;
   bool takeDurationLabelOffstage = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+//    perm.requestPermissions();
+  }
 
   @override
   Widget build(BuildContext context) {
