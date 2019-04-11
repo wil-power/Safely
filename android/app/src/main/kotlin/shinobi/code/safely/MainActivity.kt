@@ -137,9 +137,9 @@ class TheService : Service() {
         try {
             val smsManager = SmsManager.getDefault()
             smsManager.sendTextMessage(
-                "+233506153609",
+                "+233547532641",
                 null,
-                "This message was sent from Safely. :)",
+                "This message was sent with love, from Safely. <3",
                 null,
                 null
             )
@@ -161,7 +161,7 @@ class TheService : Service() {
                 Sensey.getInstance().stop()
             } else if (intent?.action == Intent.ACTION_SCREEN_OFF) {
                 val runnable = Runnable {
-                    Sensey.getInstance().startShakeDetection(30f, 5000, shakeListener)
+                    Sensey.getInstance().startShakeDetection(80f, 5000, shakeListener)
                   //  Sensey.getInstance()
                     // .startTouchTypeDetection(context, threeFingerSingleTapListener)
                 }

@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 
 class DurationDialog extends StatefulWidget {
-
   @override
   createState() => DurationDialogState();
 }
@@ -11,10 +9,8 @@ class DurationDialogState extends State<DurationDialog> {
   double minutes = 0;
   double hours = 0;
 
-
   @override
   Widget build(BuildContext context) {
-
     return AlertDialog(
       title: Text('Select Duration'),
       content: Container(
@@ -23,7 +19,7 @@ class DurationDialogState extends State<DurationDialog> {
           children: <Widget>[
             Slider(
               value: hours,
-              label: hours.round().toString(),
+              label: hours.round().toString() + " hrs",
               min: 0,
               max: 12,
               divisions: 12,
@@ -33,12 +29,17 @@ class DurationDialogState extends State<DurationDialog> {
                 });
               },
             ),
-            Padding(padding: EdgeInsets.only(top: 32.0),),
+            Padding(
+              padding: EdgeInsets.only(top: 32.0),
+            ),
             Slider(
               min: 0,
               max: 60,
               value: minutes,
-              label: minutes.round().toString(),
+              label: minutes.round().toString() +
+                  (minutes.round() == 0 || minutes.round() == 1
+                      ? " min"
+                      : " mins"),
               divisions: 60,
               onChanged: (val) {
                 setState(() {
@@ -51,7 +52,7 @@ class DurationDialogState extends State<DurationDialog> {
       ),
       actions: <Widget>[
         FlatButton(
-          onPressed: (){
+          onPressed: () {
             Navigator.pop(context, minutes);
           },
           child: Text("Done"),
