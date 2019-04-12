@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.*
 import android.util.Log
+import androidx.core.app.ServiceCompat
 import io.flutter.app.FlutterActivity
 import com.github.nisrulz.sensey.Sensey
 import com.github.nisrulz.sensey.ShakeDetector
@@ -18,8 +19,6 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GeneratedPluginRegistrant.registerWith(this)
-        Sensey.getInstance().init(applicationContext)
-        Log.e("SENSE:", "Sensey Instance created.")
 
     }
 
@@ -30,7 +29,9 @@ class MainActivity : FlutterActivity() {
 
     override fun onResume() {
         super.onResume()
+
         stopService(Intent(this, TheService::class.java))
+
     }
 }
 
@@ -43,7 +44,7 @@ class TheService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-//        Sensey.getInstance().init(applicationContext)
+
         val manager = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Sensor:WakeLogTag")
         val screenStateFilter = IntentFilter()
@@ -52,7 +53,6 @@ class TheService : Service() {
         registerReceiver(receiver, screenStateFilter)
 
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-
     }
 
     val shakeListener: ShakeDetector.ShakeListener = object : ShakeDetector.ShakeListener {
@@ -74,42 +74,8 @@ class TheService : Service() {
                 "Shaking has stopped. I think we can all agree that Sensey rocks!"
             )
             Sensey.getInstance().stopShakeDetection(this)
-            startService(Intent(applicationContext, LocationService::class.java))
+//            startService(Intent(applicationContext, LocationService::class.java))
 
-//            sendTextMessage()
-//            Sensey.getInstance()
-//                .startTouchTypeDetection(applicationContext, threeFingerSingleTapListener)
-//            Log.e("DETECTION::::", "Three fingers detection started!")
-        }
-    }
-
-    val threeFingerSingleTapListener = object : TouchTypeDetector.TouchTypListener {
-        override fun onSwipe(p0: Int) {
-            Log.e("SWIPE", "Swipe Listener triggered!")
-        }
-
-        override fun onSingleTap() {
-            Log.e("SINGLE_TAP:::", "Single tap detected!")
-        }
-
-        override fun onScroll(p0: Int) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-        override fun onLongPress() {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-        override fun onTwoFingerSingleTap() {
-            Log.e("TWOFINGERS_TAP:::", "Two fingers single tap detected!")
-        }
-
-        override fun onDoubleTap() {
-            Log.e("DOUBLE_TAP", "Double tap detected!")
-        }
-
-        override fun onThreeFingerSingleTap() {
-            Log.e("THREE_FINGERS:::", "Three fingers single tap detected!")
         }
     }
 
@@ -129,7 +95,8 @@ class TheService : Service() {
         super.onStartCommand(intent, flags, startId)
         startForeground(Process.myPid(), Notification())
         wakeLock?.acquire(100)
-
+        Sensey.getInstance().init(applicationContext)
+        Log.e("Sensey_Instance", "Sensey Instance created in onStartCommand()")
         return START_STICKY
     }
 
@@ -138,9 +105,15 @@ class TheService : Service() {
 
             if (intent?.action == Intent.ACTION_SCREEN_ON) {
                 Sensey.getInstance().stop()
+                stopForeground(true)
+                stopSelf()
+                Log.e("Screen_ON", "Service and Sensey stopped when screen came on!")
             } else if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                startForeground(Process.myPid(), Notification())
+                startService(Intent(applicationContext, TheService::class.java))
+                Log.e("SCREEN_OFF ::", "RUNNABLE STARTS NEXT! SERVICE HAS STARTED. ")
                 val runnable = Runnable {
-                    Sensey.getInstance().startShakeDetection(80f, 3000, shakeListener)
+                    Sensey.getInstance().startShakeDetection(40f, 3000, shakeListener)
 //                    Sensey.getInstance()
 //                     .startTouchTypeDetection(context, threeFingerSingleTapListener)
                 }
