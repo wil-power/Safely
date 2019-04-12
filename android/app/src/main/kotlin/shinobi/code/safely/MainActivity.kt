@@ -6,17 +6,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.location.LocationManager
 import android.os.*
-import android.telephony.SmsManager
 import android.util.Log
 import io.flutter.app.FlutterActivity
 import com.github.nisrulz.sensey.Sensey
 import com.github.nisrulz.sensey.ShakeDetector
 import com.github.nisrulz.sensey.TouchTypeDetector
 import io.flutter.plugins.GeneratedPluginRegistrant
-import java.lang.Exception
-
 
 class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +34,7 @@ class MainActivity : FlutterActivity() {
     }
 }
 
+
 class TheService : Service() {
     private val receiver = ScreenReceiver()
     private var wakeLock: PowerManager.WakeLock? = null
@@ -58,7 +55,7 @@ class TheService : Service() {
 
     }
 
-    val shakeListener = object : ShakeDetector.ShakeListener {
+    val shakeListener: ShakeDetector.ShakeListener = object : ShakeDetector.ShakeListener {
         override fun onShakeDetected() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 vibrator.vibrate(
@@ -76,7 +73,10 @@ class TheService : Service() {
                 "SHAKESTOPPED::::",
                 "Shaking has stopped. I think we can all agree that Sensey rocks!"
             )
-            sendTextMessage()
+            Sensey.getInstance().stopShakeDetection(this)
+            startService(Intent(applicationContext, LocationService::class.java))
+
+//            sendTextMessage()
 //            Sensey.getInstance()
 //                .startTouchTypeDetection(applicationContext, threeFingerSingleTapListener)
 //            Log.e("DETECTION::::", "Three fingers detection started!")
@@ -85,7 +85,7 @@ class TheService : Service() {
 
     val threeFingerSingleTapListener = object : TouchTypeDetector.TouchTypListener {
         override fun onSwipe(p0: Int) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            Log.e("SWIPE", "Swipe Listener triggered!")
         }
 
         override fun onSingleTap() {
@@ -133,27 +133,6 @@ class TheService : Service() {
         return START_STICKY
     }
 
-    private fun sendTextMessage() {
-        try {
-            val smsManager = SmsManager.getDefault()
-            smsManager.sendTextMessage(
-                "+233547532641",
-                null,
-                "This message was sent with love, from Safely. <3",
-                null,
-                null
-            )
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-    }
-
-    private fun getLongLat(context: Context) {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-
-    }
-
     inner class ScreenReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
 
@@ -161,12 +140,13 @@ class TheService : Service() {
                 Sensey.getInstance().stop()
             } else if (intent?.action == Intent.ACTION_SCREEN_OFF) {
                 val runnable = Runnable {
-                    Sensey.getInstance().startShakeDetection(80f, 5000, shakeListener)
-                  //  Sensey.getInstance()
-                    // .startTouchTypeDetection(context, threeFingerSingleTapListener)
+                    Sensey.getInstance().startShakeDetection(80f, 3000, shakeListener)
+//                    Sensey.getInstance()
+//                     .startTouchTypeDetection(context, threeFingerSingleTapListener)
                 }
                 Handler().postDelayed(runnable, 500)
             }
         }
     }
 }
+
