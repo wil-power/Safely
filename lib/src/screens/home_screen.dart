@@ -88,9 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 tag: "splash",
                 child: Image.asset("assets/images/safely_logo.png")),
           ),
-//          SizedBox(
-//            width: 280.0,
-//          ),
+
           Spacer(flex: 2,),
           IconButton(
             icon: Icon(
@@ -121,15 +119,16 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(left: 32.0),
-              child: Text('Pick a duration'),
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Text('Choose activity'),
             ),
-            SizedBox(
-              width: 130.0,
-            ),
-            Icon(
-              Icons.arrow_drop_down,
-              size: 18.0,
+            Spacer(flex: 1,),
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Icon(
+                Icons.arrow_drop_down,
+                size: 18.0,
+              ),
             )
           ],
         ),
@@ -151,15 +150,16 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(left: 32.0),
-              child: Text('Select a duration'),
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Text('Select duration'),
             ),
-            SizedBox(
-              width: 130.0,
-            ),
-            Icon(
-              Icons.arrow_drop_down,
-              size: 18.0,
+            Spacer(flex: 1,),
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Icon(
+                Icons.arrow_drop_down,
+                size: 18.0,
+              ),
             )
           ],
         ),
