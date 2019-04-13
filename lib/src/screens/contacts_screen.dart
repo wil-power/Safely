@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:pref_dessert/pref_dessert.dart';
 import 'package:safely/src/model/custom_contact.dart';
 import 'package:safely/src/misc/permissions.dart' as perm;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'chosen_contacts_screen.dart';
 
 class ContactsPage extends StatefulWidget {
   @override
@@ -16,9 +18,7 @@ class ContactsPageState extends State<ContactsPage> {
 
   List<CustomContact> selectedContacts = List();
   bool _isLoading = false;
-
-  int selectedCount = 0;
-
+  
   TextEditingController searchController = TextEditingController();
 
   @override
@@ -76,7 +76,6 @@ class ContactsPageState extends State<ContactsPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("Inside Contacts build method");
     return SafeArea(
       child: Scaffold(
         body: !_isLoading
@@ -138,16 +137,12 @@ class ContactsPageState extends State<ContactsPage> {
               Scaffold.of(context).showSnackBar(snackBar);
             } else {
               updateSharedPrefs();
-              final snackBar = SnackBar(
-                content: Text("Shared Prefs Updated"),
-                backgroundColor: Colors.green,
-              );
-              Scaffold.of(context).showSnackBar(snackBar);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ChosenContactsPage()));
             }
           },
           child: Container(
             width: MediaQuery.of(context).size.width,
-            color: selectedCount >= 3 ? Colors.amber : Colors.grey[850],
+            color: selectedContacts.length >= 3 ? Colors.amber : Colors.grey[850],
             height: 50.0,
             child: Center(
               child: Text(
@@ -184,10 +179,9 @@ class ContactsPageState extends State<ContactsPage> {
             customContact.isChecked = value;
             if (customContact.isChecked) {
               selectedContacts.add(customContact);
-              selectedCount += 1;
             } else {
               selectedContacts.remove(customContact);
-              selectedCount -= 1;
+
             }
           });
         },
@@ -196,8 +190,9 @@ class ContactsPageState extends State<ContactsPage> {
   }
 
   updateSharedPrefs() async {
+    var prefs = await SharedPreferences.getInstance();
     var repo =
-        FuturePreferencesRepository<CustomContact>(JsonCustomContactDesSer());
+        PreferencesRepository<CustomContact>(prefs, JsonCustomContactDesSer());
     repo.saveAll(selectedContacts);
   }
 }

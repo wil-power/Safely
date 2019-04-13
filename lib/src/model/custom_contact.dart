@@ -10,12 +10,13 @@ class CustomContact {
   CustomContact({this.contact, this.isChecked = false});
 }
 
-
 class JsonCustomContactDesSer extends DesSer<CustomContact> {
   @override
   CustomContact deserialize(String s) {
-    var map = json.decode(s);
-    return CustomContact(contact: Contact.fromMap(map));
+    print("Deserialized: $s");
+    var con = Contact(givenName: s);
+    con.displayName = s;
+    return CustomContact(contact: con);
   }
 
   @override
@@ -24,8 +25,8 @@ class JsonCustomContactDesSer extends DesSer<CustomContact> {
 
   @override
   String serialize(CustomContact t) {
-    var map = {"contact":t.contact.displayName};
-    return json.encode(map);
+    print("Serialize: ${t.contact.displayName}");
+    return "${t.contact.displayName}";
   }
 
 }
