@@ -170,15 +170,14 @@ class _HomeScreenState extends State<HomeScreen> {
   String initial = "Buying a phone from Circle";
 
   List<String> dialogList = [
-    'Taking a walk in the neighborhood',
-    "Buying food from Madam Obeng's",
+    'Taking a walk alone in the neighborhood',
+    'Picking a taxi',
     "Buying a phone from Circle",
     "Going to Kobby's house",
-    "Going out for a run through the neighborhood"
+    "Going out for a run in the neighborhood",
+    "Purchasing an item from the neighborhood supermarket"
   ];
-
-  List<double> durationList = [1];
-
+  
   _openDialog() {
     showDialog(
         context: context,
