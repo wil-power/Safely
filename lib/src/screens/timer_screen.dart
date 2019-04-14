@@ -1,37 +1,46 @@
-
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:safely/src/model/activity_information.dart';
 
 class TimerScreen extends StatefulWidget {
   final UserActivityInfo userActivityInfo;
+
   TimerScreen({Key key, this.userActivityInfo}) : super(key: key);
 
   @override
   _TimerScreenState createState() => _TimerScreenState();
 }
 
-class _TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin {
+class _TimerScreenState extends State<TimerScreen>
+    with TickerProviderStateMixin {
   AnimationController animationController;
+  Animation animation;
+  bool canRepaint = false;
 
   String get timerString {
     Duration duration =
         animationController.duration * animationController.value;
-    return '${duration.inHours.toString().padLeft(2, '0')}:${(duration.inMinutes % 60).toString()
-        .padLeft(2, '0')}:${(duration.inSeconds % 60)
-        .toString()
-        .padLeft(2, '0')}';
+    return '${duration.inHours.toString().padLeft(2, '0')}:${(duration.inMinutes % 60).toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
-
-    @override
+  @override
   void initState() {
     super.initState();
-    animationController =
-        AnimationController(vsync: this, duration: widget.userActivityInfo.duration);
-    
-    startCountDown();
+    animationController = AnimationController(
+        vsync: this, duration: widget.userActivityInfo.duration);
 
+    animation =
+        CurvedAnimation(parent: animationController, curve: Curves.linear)
+          ..addStatusListener((AnimationStatus status) {
+            if(status == AnimationStatus.dismissed) {
+              setState(() {
+               animationController = AnimationController(vsync: this, duration: Duration(minutes: 1));
+             });
+
+             startCountDown();
+            }
+          });
+    startCountDown();
   }
 
   @override
@@ -42,91 +51,93 @@ class _TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Align(
-                alignment: FractionalOffset.center,
-                child: AspectRatio(
-                  aspectRatio: 1.0,
-                  child: Stack(
-                    children: <Widget>[
-                      Positioned.fill(
-                        child: AnimatedBuilder(
-                          animation: animationController,
-                          builder: (BuildContext context, Widget child) {
-                            return CustomPaint(
-                              painter: TimerPainter(
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        body: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: Align(
+                  alignment: FractionalOffset.center,
+                  child: AspectRatio(
+                    aspectRatio: 1.0,
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned.fill(
+                          child: AnimatedBuilder(
+                            animation: animationController,
+                            builder: (BuildContext context, Widget child) {
+                              return CustomPaint(
+                                painter: TimerPainter(
+                                    animation: animation,
+                                    backgroundColor: Colors.white,
+                                    color: Theme.of(context).accentColor),
+                              );
+                            },
+                          ),
+                        ),
+                        Align(
+                          alignment: FractionalOffset.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
+                                "Count Down",
+                                style: Theme.of(context).textTheme.subhead,
+                              ),
+                              AnimatedBuilder(
                                   animation: animationController,
-                                  backgroundColor: Colors.white,
-                                  color: Theme.of(context).accentColor),
-                            );
-                          },
-                        ),
-                      ),
-                      Align(
-                        alignment: FractionalOffset.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Count Down",
-                              style: Theme.of(context).textTheme.subhead,
-                            ),
-                            AnimatedBuilder(
-                                animation: animationController,
-                                builder: (_, Widget child) {
-                                  return Text(
-                                    timerString,
-                                    style: Theme.of(context).textTheme.display3,
-                                  );
-                                })
-                          ],
-                        ),
-                      )
-                    ],
+                                  builder: (_, Widget child) {
+                                    return Text(
+                                      timerString,
+                                      style: Theme.of(context).textTheme.display3,
+                                    );
+                                  })
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Container(
-              margin: EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  FloatingActionButton(
-                    child: AnimatedBuilder(
-                        animation: animationController,
-                        builder: (_, Widget child) {
-                          return Icon(animationController.isAnimating
-                              ? Icons.pause
-                              : Icons.play_arrow);
-                        }),
-                    onPressed: () {
-                      if (animationController.isAnimating) {
-                        animationController.stop();
-                      }
-                    },
-                  )
-                ],
-              ),
-            )
-          ],
+              Container(
+                margin: EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    FloatingActionButton(
+                      child: AnimatedBuilder(
+                          animation: animationController,
+                          builder: (_, Widget child) {
+                            return Icon(animationController.isAnimating
+                                ? Icons.pause
+                                : Icons.play_arrow);
+                          }),
+                      onPressed: () {
+                        if (animationController.isAnimating) {
+                          animationController.stop();
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
-
   void startCountDown() {
     animationController.reverse(
-        from: animationController.value == 0.0
-            ? 1.0
-            : animationController.value);
+        from:
+            animationController.value == 0.0 ? 1.0 : animationController.value);
   }
 }
 
@@ -134,8 +145,9 @@ class TimerPainter extends CustomPainter {
   final Animation<double> animation;
   final Color backgroundColor;
   final Color color;
+  final bool restartPainting;
 
-  TimerPainter({this.animation, this.backgroundColor, this.color})
+  TimerPainter({this.animation, this.backgroundColor, this.color, this.restartPainting})
       : super(repaint: animation);
 
   @override
@@ -159,4 +171,5 @@ class TimerPainter extends CustomPainter {
         color != old.color ||
         backgroundColor != old.backgroundColor;
   }
+
 }
