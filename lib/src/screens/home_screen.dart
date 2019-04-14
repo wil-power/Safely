@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import "package:easy_dialogs/easy_dialogs.dart";
+import 'package:flutter/services.dart';
 import 'package:safely/src/screens/timer_screen.dart';
 import 'duration_dialog.dart';
 import 'package:safely/src/model/activity_information.dart';
@@ -34,8 +37,13 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildHomeScreen(),
+    return WillPopScope(
+      onWillPop: () async {
+        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      },
+      child: Scaffold(
+        body: _buildHomeScreen(),
+      ),
     );
   }
 
