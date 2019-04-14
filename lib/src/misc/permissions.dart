@@ -6,7 +6,6 @@ requestPermissions() async {
     PermissionGroup.contacts,
     PermissionGroup.sms,
     PermissionGroup.location
-
   ]);
 
 }
