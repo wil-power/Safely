@@ -8,11 +8,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.*
 import android.util.Log
-import androidx.core.app.ServiceCompat
 import io.flutter.app.FlutterActivity
 import com.github.nisrulz.sensey.Sensey
 import com.github.nisrulz.sensey.ShakeDetector
-import com.github.nisrulz.sensey.TouchTypeDetector
+import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity : FlutterActivity() {
@@ -20,7 +19,36 @@ class MainActivity : FlutterActivity() {
         super.onCreate(savedInstanceState)
         GeneratedPluginRegistrant.registerWith(this)
 
+        MethodChannel(flutterView, CHANNEL).setMethodCallHandler{ call, result ->
+            if (call.method == "sendSms") {
+                val number = call.argument<String>("phone")
+                val message = call.argument<String>("message")
+                val numberList = number?.split(',')
+                var sendCount = 0
+                numberList?.forEach {
+                    Thread.sleep(3000)
+                   sendCount += sendSms(it, message)
+                }
+                if (sendCount == numberList?.size) {
+                    result.success("success")
+                }else {
+                    result.error("Err", "Message not sent", "")
+                }
+
+            }else {
+                result.notImplemented()
+            }
+        }
+
     }
+
+
+
+    companion object {
+        val CHANNEL = "io.safely.code.shinobi/sendSms"
+    }
+
+
 
     override fun onStop() {
         super.onStop()

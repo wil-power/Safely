@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import 'package:safely/src/model/activity_information.dart';
 
@@ -16,6 +17,7 @@ class _TimerScreenState extends State<TimerScreen>
   AnimationController animationController;
   Animation animation;
 
+  static const platform = const MethodChannel('io.safely.code.shinobi/sendSms');
   int repeatCount = 0;
 
   String get timerString {
@@ -36,16 +38,15 @@ class _TimerScreenState extends State<TimerScreen>
             if (status == AnimationStatus.dismissed && repeatCount == 0) {
               setState(() {
                 repeatCount += 1;
-                animationController = AnimationController(vsync: this, duration: Duration(seconds: 10));
-                animation = animationController..addStatusListener((status){
-                  if(status == AnimationStatus.dismissed){
-                    animationController.dispose();
-                    // send sms
-
-                  }
-                }
-                );
-
+                animationController = AnimationController(
+                    vsync: this, duration: Duration(seconds: 10));
+                animation = animationController
+                  ..addStatusListener((status) {
+                    if (status == AnimationStatus.dismissed) {
+                      sendingSms();
+                      Navigator.of(context).pop();
+                    }
+                  });
               });
               startCountDown();
             }
@@ -58,6 +59,14 @@ class _TimerScreenState extends State<TimerScreen>
   void dispose() {
     animationController.dispose();
     super.dispose();
+  }
+
+  void sendingSms() async {
+    await platform.invokeMethod("sendSms", <String, dynamic>{
+      "phone": "+233552212443,+233209050642,+233554021947",
+      "message": "The school dier we go finish am. Sent with love, Safely."
+    });
+
   }
 
   @override

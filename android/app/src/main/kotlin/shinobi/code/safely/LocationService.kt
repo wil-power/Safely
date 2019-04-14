@@ -59,20 +59,25 @@ class LocationService : Service() {
             val stringLong = long.toString()
             val stringLat = lat.toString()
 
-            val sb = StringBuilder()
-            sb.append("http://maps.google.com/?q=$stringLong,$stringLat")
+            val sb = "http://maps.google.com/?q=$stringLong,$stringLat"
 
-            try {
-                val smsManager = SmsManager.getDefault()
-                smsManager.sendTextMessage(
-                    "+233547532641",
-                    null,
-                    "This message was sent with love, from Safely. <3. Location: $sb" ,
-                    null,
-                    null
-                )
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+//            try {
+//                val smsManager = SmsManager.getDefault()
+//                smsManager.sendTextMessage(
+//                    "+233547532641",
+//                    null,
+//                    "This message was sent with love, from Safely. <3. Location: $sb" ,
+//                    null,
+//                    null
+//                )
+//            } catch (ex: Exception) {
+//                ex.printStackTrace()
+//            }
+           val res = sendSms("+233209050642", sb)
+            if (res == 1) {
+                print("Sent from background service successfully")
+            }else {
+                print("An error occurred!")
             }
         }
 
