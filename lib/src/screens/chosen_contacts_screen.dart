@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:pref_dessert/pref_dessert.dart';
 import 'package:safely/src/model/custom_contact.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:contacts_service/contacts_service.dart';
 
 class ChosenContactsPage extends StatefulWidget {
   @override

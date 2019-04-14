@@ -18,7 +18,7 @@ class ContactsPageState extends State<ContactsPage> {
 
   List<CustomContact> selectedContacts = List();
   bool _isLoading = false;
-  
+
   TextEditingController searchController = TextEditingController();
 
   @override
