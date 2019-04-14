@@ -2,24 +2,34 @@ import 'package:flutter/material.dart';
 import "package:easy_dialogs/easy_dialogs.dart";
 import 'package:safely/src/screens/timer_screen.dart';
 import 'duration_dialog.dart';
-import '../misc/permissions.dart' as perm;
+import 'package:safely/src/model/activity_information.dart';
+import 'package:safely/src/screens/chosen_contacts_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   double margin = 1.0;
   String selected;
-  String durationSelected;
-  bool takeOffstage = true;
-  bool takeDurationLabelOffstage = true;
+  String durationSelected = "Select duration";
+  String userActivity = "Choose activity";
+
+//  String chooseActivityLabel = displayActivityLabel ? "Choose Activity" : "";
+//  static bool displayActivityLabel = false;
+//  String chooseDurationLabel = displayDurationLabel ? "Choose Duration" : "";
+//  static bool displayDurationLabel = false;
 
   @override
   void initState() {
     super.initState();
-    perm.requestPermissions();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -34,8 +44,14 @@ class _HomeScreenState extends State<HomeScreen> {
       children: <Widget>[
         Container(
           padding: const EdgeInsets.only(left: 8.0),
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -70,7 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildAppBar() {
     return Container(
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -78,9 +97,9 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: ShapeDecoration(
               shape: CircleBorder(
                   side: BorderSide(
-                width: 4.0,
-                color: Colors.white70,
-              )),
+                    width: 4.0,
+                    color: Colors.white70,
+                  )),
             ),
             height: 50,
             width: 50,
@@ -88,8 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 tag: "splash",
                 child: Image.asset("assets/images/safely_logo.png")),
           ),
-
-          Spacer(flex: 2,),
+          Spacer(
+            flex: 2,
+          ),
           IconButton(
             icon: Icon(
               Icons.settings,
@@ -97,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
               size: 30.0,
             ),
             onPressed: () {
-              print("Settings button pressed!");
+              _showBottomSheet(context);
             },
           ),
         ],
@@ -120,9 +140,11 @@ class _HomeScreenState extends State<HomeScreen> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(left: 16.0),
-              child: Text('Choose activity'),
+              child: Text(userActivity),
             ),
-            Spacer(flex: 1,),
+            Spacer(
+              flex: 1,
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: Icon(
@@ -151,9 +173,11 @@ class _HomeScreenState extends State<HomeScreen> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(left: 16.0),
-              child: Text('Select duration'),
+              child: Text(durationSelected),
             ),
-            Spacer(flex: 1,),
+            Spacer(
+              flex: 1,
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: Icon(
@@ -167,36 +191,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String initial = "Buying a phone from Circle";
-
+  String initial = "Taking a walk alone in the neighborhood";
   List<String> dialogList = [
     'Taking a walk alone in the neighborhood',
     'Picking a taxi',
     "Buying a phone from Circle",
     "Going to Kobby's house",
     "Going out for a run in the neighborhood",
-    "Purchasing an item from the neighborhood supermarket"
   ];
-  
+
   _openDialog() {
     showDialog(
         context: context,
-        builder: (context) => SingleChoiceConfirmationDialog<String>(
-              title: Text("Choose activity"),
+        builder: (context) =>
+            SingleChoiceConfirmationDialog<String>(
+              title: Text("Choose Activity"),
               initialValue: initial,
               items: dialogList,
-              onSelected: _onSelected,
+              onSubmitted: (string) {
+                setState(() {
+                  userActivity = string;
+                });
+              },
             ));
-  }
-
-  _onSelected(dynamic value) {
-    print('Selected $value');
   }
 
   void _showDurationPickerDialog() async {
     // this will contain the result of the Navigator.pop(context, result)
-    final selectedMins = await showDialog(
+    final results = await showDialog(
         context: context, builder: (context) => DurationDialog());
+    String hrText = results[0] == 1 || results[0] == 0 ? "hr" : "hrs";
+    String minText = results[1] == 1 || results[1] == 0 ? "min" : "mins";
+
+    setState(() {
+      if (results != null) {
+        hours = results[0];
+        minutes = results[1];
+        durationSelected = "${results[0]}$hrText, ${results[1]}$minText";
+      }
+    });
   }
 
   Widget _buildTextField() {
@@ -214,11 +247,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  int hours;
+  int minutes;
+
   Widget _buildStartTimerButton() {
     return RawMaterialButton(
         onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => TimerScreen()));
+          if (userActivity.toLowerCase() != "choose activity" &&
+              (hours != null && minutes != null)) {
+            var infoObj = UserActivityInfo(
+                activityTitle: userActivity,
+                duration: Duration(hours: hours, minutes: minutes));
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        TimerScreen(
+                          userActivityInfo: infoObj,
+                        )));
+          } else if (userActivity.toLowerCase() == "choose activity") {
+            print("Pick an activity");
+          } else if (hours == 0 && minutes == 0) {
+            print("Pick a duration");
+          }
         },
         splashColor: Colors.green,
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -226,5 +278,36 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text("Start Timer"),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0))));
+  }
+
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10.0),
+                  topRight: Radius.circular(10.0)),),
+            child: _buildBottomSheetContent(),
+          );
+        });
+  }
+
+  Widget _buildBottomSheetContent() {
+    return Column(
+      children: <Widget>[
+        Center(child: Text("Settings",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),),
+        ListTile(
+          leading: Icon(Icons.contacts, color: Colors.blueGrey,),
+          title: Text("View selected contacts"),
+          trailing: Icon(Icons.keyboard_arrow_right, size: 18.0, color: Colors.blueGrey,),
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChosenContactsPage()));
+          },
+        )
+      ],
+    );
   }
 }
