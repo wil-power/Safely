@@ -15,7 +15,8 @@ class _TimerScreenState extends State<TimerScreen>
     with TickerProviderStateMixin {
   AnimationController animationController;
   Animation animation;
-  bool canRepaint = false;
+
+  int repeatCount = 0;
 
   String get timerString {
     Duration duration =
@@ -32,14 +33,24 @@ class _TimerScreenState extends State<TimerScreen>
     animation =
         CurvedAnimation(parent: animationController, curve: Curves.linear)
           ..addStatusListener((AnimationStatus status) {
-            if(status == AnimationStatus.dismissed) {
+            if (status == AnimationStatus.dismissed && repeatCount == 0) {
               setState(() {
-               animationController = AnimationController(vsync: this, duration: Duration(minutes: 1));
-             });
+                repeatCount += 1;
+                animationController = AnimationController(vsync: this, duration: Duration(seconds: 10));
+                animation = animationController..addStatusListener((status){
+                  if(status == AnimationStatus.dismissed){
+                    animationController.dispose();
+                    // send sms
 
-             startCountDown();
+                  }
+                }
+                );
+
+              });
+              startCountDown();
             }
           });
+
     startCountDown();
   }
 
@@ -93,7 +104,8 @@ class _TimerScreenState extends State<TimerScreen>
                                   builder: (_, Widget child) {
                                     return Text(
                                       timerString,
-                                      style: Theme.of(context).textTheme.display3,
+                                      style:
+                                          Theme.of(context).textTheme.display3,
                                     );
                                   })
                             ],
@@ -147,7 +159,8 @@ class TimerPainter extends CustomPainter {
   final Color color;
   final bool restartPainting;
 
-  TimerPainter({this.animation, this.backgroundColor, this.color, this.restartPainting})
+  TimerPainter(
+      {this.animation, this.backgroundColor, this.color, this.restartPainting})
       : super(repaint: animation);
 
   @override
@@ -171,5 +184,4 @@ class TimerPainter extends CustomPainter {
         color != old.color ||
         backgroundColor != old.backgroundColor;
   }
-
 }

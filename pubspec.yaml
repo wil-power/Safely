@@ -27,6 +27,7 @@ dependencies:
   permission_handler: ^3.0.0
   contacts_service: ^0.2.4
   pref_dessert: ^0.2.3
+  sms: ^0.2.4
 
 dev_dependencies:
   flutter_test:
