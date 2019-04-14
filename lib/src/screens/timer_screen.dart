@@ -1,9 +1,12 @@
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-
+import 'package:safely/src/model/activity_information.dart';
 
 class TimerScreen extends StatefulWidget {
+  final UserActivityInfo userActivityInfo;
+  TimerScreen({Key key, this.userActivityInfo}) : super(key: key);
+
   @override
   _TimerScreenState createState() => _TimerScreenState();
 }
@@ -14,7 +17,7 @@ class _TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin
   String get timerString {
     Duration duration =
         animationController.duration * animationController.value;
-    return '${duration.inMinutes.toString()
+    return '${duration.inHours.toString().padLeft(2, '0')}:${(duration.inMinutes % 60).toString()
         .padLeft(2, '0')}:${(duration.inSeconds % 60)
         .toString()
         .padLeft(2, '0')}';
@@ -25,7 +28,16 @@ class _TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin
   void initState() {
     super.initState();
     animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 0, minutes: 1, hours: 0));
+        AnimationController(vsync: this, duration: widget.userActivityInfo.duration);
+    
+    startCountDown();
+
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,7 +82,7 @@ class _TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin
                                 builder: (_, Widget child) {
                                   return Text(
                                     timerString,
-                                    style: Theme.of(context).textTheme.display4,
+                                    style: Theme.of(context).textTheme.display3,
                                   );
                                 })
                           ],
@@ -97,11 +109,6 @@ class _TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin
                     onPressed: () {
                       if (animationController.isAnimating) {
                         animationController.stop();
-                      } else {
-                        animationController.reverse(
-                            from: animationController.value == 0.0
-                                ? 1.0
-                                : animationController.value);
                       }
                     },
                   )
@@ -112,6 +119,14 @@ class _TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin
         ),
       ),
     );
+  }
+
+
+  void startCountDown() {
+    animationController.reverse(
+        from: animationController.value == 0.0
+            ? 1.0
+            : animationController.value);
   }
 }
 
