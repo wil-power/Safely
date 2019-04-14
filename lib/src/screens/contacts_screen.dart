@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pref_dessert/pref_dessert.dart';
 import 'package:safely/src/model/custom_contact.dart';
 import 'package:safely/src/misc/permissions.dart' as perm;
+import 'package:safely/src/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'chosen_contacts_screen.dart';
 
@@ -137,7 +138,7 @@ class ContactsPageState extends State<ContactsPage> {
               Scaffold.of(context).showSnackBar(snackBar);
             } else {
               updateSharedPrefs();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ChosenContactsPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
             }
           },
           child: Container(

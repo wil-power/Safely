@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:pref_dessert/pref_dessert.dart';
 import 'package:safely/src/model/custom_contact.dart';
@@ -33,10 +34,10 @@ class ChosenContactsPageState extends State<ChosenContactsPage> {
     super.dispose();
   }
 
-  savePreferences() async{
+  savePreferences() async {
     var prefs = await SharedPreferences.getInstance();
     var repo =
-    PreferencesRepository<CustomContact>(prefs, JsonCustomContactDesSer());
+        PreferencesRepository<CustomContact>(prefs, JsonCustomContactDesSer());
     repo.saveAll(savedContacts);
   }
 
@@ -60,21 +61,45 @@ class ChosenContactsPageState extends State<ChosenContactsPage> {
     );
   }
 
-  Widget _buildChosenContactsList() {
-    return ListView.builder(
-      itemCount: savedContacts.length,
-      itemBuilder: (context, index) {
-        CustomContact contact = savedContacts[index];
-//        var phonesList = contact.contact.phones.toList();
+  Widget _buildTitleBar() {
+    return Container(
+      color: Colors.blueGrey[200],
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 24.0, bottom: 16.0),
+          child: Text(
+            "Selected Contacts",
+            style: TextStyle(fontSize: 24.0),
+          ),
+        ),
+      ),
+    );
+  }
 
-        return _buildListTile(contact, index);
-      },
+  Widget _buildChosenContactsList() {
+    return Column(
+      children: <Widget>[
+        _buildTitleBar(),
+        Expanded(
+          child: ListView.builder(
+            itemCount: savedContacts.length,
+            itemBuilder: (context, index) {
+              CustomContact contact = savedContacts[index];
+
+              return _buildListTile(contact, index);
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildListTile(CustomContact customContact, int index) {
+    var list = customContact.contact.phones.toList();
     return Dismissible(
-      background: Container(color: Colors.red,),
+      background: Container(
+        color: Colors.red,
+      ),
       onDismissed: (direction) {
         setState(() {
           savedContacts.removeAt(index);
@@ -88,11 +113,17 @@ class ChosenContactsPageState extends State<ChosenContactsPage> {
           ),
         ),
         title: Text(customContact.contact.displayName ?? ""),
-//      subtitle: list.length >= 1 && list[0]?.value != null
-//          ? Text(list[0].value)
-//          : Text(''),
-      ), key: Key(customContact.contact.displayName),
+        subtitle: list.length >= 1 && list[0]?.value != null
+            ? Text(list[0].value)
+            : Text(''),
+      ),
+      key: Key(customContact.contact.displayName),
     );
   }
 
+  Widget _buildSubtitle(List<Item> list) {
+    return list.length > 1 && list[0].value != null
+        ? Text(list[0].value)
+        : Text("");
+  }
 }
