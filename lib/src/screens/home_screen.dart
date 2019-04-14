@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import "package:easy_dialogs/easy_dialogs.dart";
 import 'package:flutter/services.dart';
+import 'package:safely/src/screens/contacts_screen.dart';
 import 'package:safely/src/screens/timer_screen.dart';
 import 'duration_dialog.dart';
 import 'package:safely/src/model/activity_information.dart';
 import 'package:safely/src/screens/chosen_contacts_screen.dart';
+import 'package:rounded_modal/rounded_modal.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -52,14 +54,8 @@ class _HomeScreenState extends State<HomeScreen>
       children: <Widget>[
         Container(
           padding: const EdgeInsets.only(left: 8.0),
-          height: MediaQuery
-              .of(context)
-              .size
-              .height,
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -94,10 +90,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildAppBar() {
     return Container(
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
+      width: MediaQuery.of(context).size.width,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -105,9 +98,9 @@ class _HomeScreenState extends State<HomeScreen>
             decoration: ShapeDecoration(
               shape: CircleBorder(
                   side: BorderSide(
-                    width: 4.0,
-                    color: Colors.white70,
-                  )),
+                width: 4.0,
+                color: Colors.white70,
+              )),
             ),
             height: 50,
             width: 50,
@@ -118,15 +111,18 @@ class _HomeScreenState extends State<HomeScreen>
           Spacer(
             flex: 2,
           ),
-          IconButton(
-            icon: Icon(
-              Icons.settings,
-              color: Colors.black54,
-              size: 30.0,
+          Theme(
+            data: ThemeData(canvasColor: Colors.transparent),
+            child: IconButton(
+              icon: Icon(
+                Icons.settings,
+                color: Colors.black54,
+                size: 30.0,
+              ),
+              onPressed: () {
+                _showBottomSheet(context);
+              },
             ),
-            onPressed: () {
-              _showBottomSheet(context);
-            },
           ),
         ],
       ),
@@ -211,8 +207,7 @@ class _HomeScreenState extends State<HomeScreen>
   _openDialog() {
     showDialog(
         context: context,
-        builder: (context) =>
-            SingleChoiceConfirmationDialog<String>(
+        builder: (context) => SingleChoiceConfirmationDialog<String>(
               title: Text("Choose Activity"),
               initialValue: initial,
               items: dialogList,
@@ -270,8 +265,7 @@ class _HomeScreenState extends State<HomeScreen>
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        TimerScreen(
+                    builder: (context) => TimerScreen(
                           userActivityInfo: infoObj,
                         )));
           } else if (userActivity.toLowerCase() == "choose activity") {
@@ -289,15 +283,26 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    showRoundedModalBottomSheet(
         context: context,
+        color: Colors.blueGrey,
+        radius: 20,
         builder: (context) {
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10.0),
-                  topRight: Radius.circular(10.0)),),
-            child: _buildBottomSheetContent(),
+          return Theme(
+            data: ThemeData(canvasColor: Colors.transparent),
+            child: Container(
+              height: 350,
+              color: Colors.transparent,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10.0),
+                      topRight: Radius.circular(10.0)),
+                ),
+                child: _buildBottomSheetContent(),
+              ),
+            ),
           );
         });
   }
@@ -305,16 +310,55 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildBottomSheetContent() {
     return Column(
       children: <Widget>[
-        Center(child: Text("Settings",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+          child: Center(
+            child: Text(
+              "Settings",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24.0),
+            ),
+          ),
+        ),
         ListTile(
-          leading: Icon(Icons.contacts, color: Colors.blueGrey,),
+          leading: Icon(
+            Icons.remove_red_eye,
+            color: Colors.blueGrey,
+          ),
           title: Text("View selected contacts"),
-          trailing: Icon(Icons.keyboard_arrow_right, size: 18.0, color: Colors.blueGrey,),
+          trailing: Icon(
+            Icons.keyboard_arrow_right,
+            size: 18.0,
+            color: Colors.blueGrey,
+          ),
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChosenContactsPage()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => ChosenContactsPage()));
           },
-        )
+        ),
+        ListTile(
+          leading: Icon(
+            Icons.add,
+            color: Colors.blueGrey,
+          ),
+          title: Text("Add New Contacts"),
+          trailing: Icon(
+            Icons.keyboard_arrow_right,
+            size: 18.0,
+            color: Colors.blueGrey,
+          ),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => ContactsPage()));
+          },
+        ),
+
       ],
     );
   }
