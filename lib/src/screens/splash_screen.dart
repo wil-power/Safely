@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:safely/src/misc/permissions.dart' as perm;
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class SplashScreenState extends State<SplashScreen> {
     // set this screen as a full screen
     SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
+    perm.requestPermissions();
     startTimer();
   }
 

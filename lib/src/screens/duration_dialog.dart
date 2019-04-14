@@ -19,7 +19,8 @@ class DurationDialogState extends State<DurationDialog> {
           children: <Widget>[
             Slider(
               value: hours,
-              label: hours.round().toString() + " hrs",
+              label: hours.round().toString() +
+                  (hours.round() == 0 || hours.round() == 1 ? " hr" : " hrs"),
               min: 0,
               max: 12,
               divisions: 12,
@@ -30,7 +31,7 @@ class DurationDialogState extends State<DurationDialog> {
               },
             ),
             Padding(
-              padding: EdgeInsets.only(top: 32.0),
+              padding: EdgeInsets.only(top: 16.0),
             ),
             Slider(
               min: 0,
@@ -53,7 +54,10 @@ class DurationDialogState extends State<DurationDialog> {
       actions: <Widget>[
         FlatButton(
           onPressed: () {
-            Navigator.pop(context, minutes);
+            if (hours > 0 || minutes > 0)
+              Navigator.pop(context, [hours.toInt(), minutes.toInt()]);
+            else
+              Navigator.pop(context);
           },
           child: Text("Done"),
         )
