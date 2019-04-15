@@ -46,10 +46,6 @@ class ContactsPageState extends State<ContactsPage> {
     var contactList =
         contacts.where((item) => item.displayName != null).toList();
     var temp = repo.findAll();
-//    temp.forEach((temp) =>
-//      print(temp.contact.displayName)
-//    );
-    print("TEMP_EMPTY? ${temp.isNotEmpty}");
 
     if (temp.isNotEmpty) {
       temp.forEach((tem) {
