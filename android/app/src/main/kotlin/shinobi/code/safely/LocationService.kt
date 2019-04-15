@@ -1,136 +1,147 @@
 package shinobi.code.safely
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.OnSuccessListener
 import android.os.IBinder
-import android.telephony.SmsManager
+import android.os.Looper
 import android.util.Log
-import java.lang.Exception
-import java.lang.IllegalArgumentException
-import java.lang.StringBuilder
+import android.widget.Toast
+import io.nlopez.smartlocation.OnLocationUpdatedListener
+import io.nlopez.smartlocation.SmartLocation
+import java.util.concurrent.Executor
+
 
 class LocationService : Service() {
-    companion object {
-        const val TAG = "MyLocationService"
-        const val LOCATION_INTERVAL = 1000L
-        const val LOCATION_DISTANCE = 10f
-    }
+    private var mLocationManager: LocationManager? = null
 
-    private var locationManager: LocationManager? = null
 
-    private class LocationListener(provider: String) : android.location.LocationListener {
-        var lastLocation: Location
+    var mLocationListeners = arrayOf(
+        LocationListener(LocationManager.GPS_PROVIDER),
+        LocationListener(LocationManager.NETWORK_PROVIDER)
+    )
 
-        override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
-
-        }
-
-        override fun onProviderEnabled(p0: String?) {
-
-        }
-
-        override fun onProviderDisabled(p0: String?) {
-
-        }
-
+    inner class LocationListener(provider: String) : android.location.LocationListener {
+        internal var mLastLocation: Location
 
         init {
             Log.e(TAG, "LocationListener $provider")
-            lastLocation = Location(provider)
+            mLastLocation = Location(provider)
         }
 
-        override fun onLocationChanged(location: Location?) {
-            Log.e(TAG, "onLocationChanged $location")
-            lastLocation.set(location)
-            sendTextMessage()
+        override fun onLocationChanged(location: Location) {
+            Log.e(TAG, "onLocationChanged: $location")
+            mLastLocation.set(location)
+            Log.v(
+                "LastLocation",
+                mLastLocation.latitude.toString() + "  " + mLastLocation.longitude.toString()
+            )
+            sendTextMessage("", numbers)
 
         }
 
-        fun getLongLat(): Pair<Double, Double> {
-            return Pair(lastLocation.longitude, lastLocation.latitude)
-        }
+        fun sendTextMessage(mess: String, num: ArrayList<String>) {
+            val long = mLastLocation.longitude
+            val lat = mLastLocation.latitude
 
-        private fun sendTextMessage() {
-            val (long, lat) = getLongLat()
-            val stringLong = long.toString()
-            val stringLat = lat.toString()
-
-            val sb = "http://maps.google.com/?q=$stringLong,$stringLat"
-
-//            try {
-//                val smsManager = SmsManager.getDefault()
-//                smsManager.sendTextMessage(
-//                    "+233547532641",
-//                    null,
-//                    "This message was sent with love, from Safely. <3. Location: $sb" ,
-//                    null,
-//                    null
-//                )
-//            } catch (ex: Exception) {
-//                ex.printStackTrace()
-//            }
-           val res = sendSms("+233209050642", sb)
-            if (res == 1) {
-                print("Sent from background service successfully")
-            }else {
-                print("An error occurred!")
+            val maps = "http://maps.google.com/?q=$lat,$long"
+            for (i in 0 until num.size) {
+                Thread.sleep(2000)
+                sendSms(num[i], "Hey, I might be in trouble. Please find me at $maps")
             }
         }
+        override fun onProviderDisabled(provider: String) {
+            Log.e(TAG, "onProviderDisabled: $provider")
+        }
 
+        override fun onProviderEnabled(provider: String) {
+            Log.e(TAG, "onProviderEnabled: $provider")
+        }
+
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+            Log.e(TAG, "onStatusChanged: $provider")
+        }
     }
 
-    private val locationListeners = arrayOf(LocationListener(LocationManager.PASSIVE_PROVIDER))
-
-    override fun onBind(p0: Intent?): IBinder? {
+    override fun onBind(arg0: Intent): IBinder? {
         return null
     }
+
+    private lateinit var numbers: ArrayList<String>
+
+    private lateinit var message: String
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.e(TAG, "onStartCommand")
         super.onStartCommand(intent, flags, startId)
-        return START_STICKY
+        val bundle = intent?.extras
+        numbers = bundle?.getStringArrayList("numbers")!!
+        message = bundle.getString("message")!!
+        return Service.START_STICKY
     }
 
     override fun onCreate() {
         Log.e(TAG, "onCreate")
-
         initializeLocationManager()
-
         try {
-            locationManager?.requestLocationUpdates(
-                LocationManager.PASSIVE_PROVIDER,
-                LOCATION_INTERVAL,
-                LOCATION_DISTANCE,
-                locationListeners[0]
+            mLocationManager!!.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL.toLong(), LOCATION_DISTANCE,
+                mLocationListeners[1]
             )
-        } catch (ex: SecurityException) {
-            Log.i(TAG, "failed to request location update, ignore", ex)
+        } catch (ex: java.lang.SecurityException) {
+            Log.i(TAG, "fail to request location update, ignore", ex)
         } catch (ex: IllegalArgumentException) {
             Log.d(TAG, "network provider does not exist, " + ex.message)
         }
+
+        try {
+            mLocationManager!!.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER, LOCATION_INTERVAL.toLong(), LOCATION_DISTANCE,
+                mLocationListeners[0]
+            )
+        } catch (ex: java.lang.SecurityException) {
+            Log.i(TAG, "fail to request location update, ignore", ex)
+        } catch (ex: IllegalArgumentException) {
+            Log.d(TAG, "gps provider does not exist " + ex.message)
+        }
+
     }
 
     override fun onDestroy() {
+        Log.e(TAG, "onDestroy")
         super.onDestroy()
-        if (locationManager != null) {
-            for (i in 0..locationListeners.size) {
+        if (mLocationManager != null) {
+            for (i in mLocationListeners.indices) {
                 try {
-                    locationManager!!.removeUpdates(locationListeners[i])
+                    mLocationManager!!.removeUpdates(mLocationListeners[i])
                 } catch (ex: Exception) {
-                    Log.i(TAG, "fail to remove location listener, ignore", ex)
+                    Log.i(TAG, "fail to remove location listners, ignore", ex)
                 }
+
             }
         }
     }
 
     private fun initializeLocationManager() {
-        if (locationManager == null) {
-            locationManager =
+        Log.e(TAG, "initializeLocationManager")
+        if (mLocationManager == null) {
+            mLocationManager =
                 applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         }
+    }
+
+    companion object {
+        private val TAG = "BOOMBOOMTESTGPS"
+        private val LOCATION_INTERVAL = 1000
+        private val LOCATION_DISTANCE = 0f
+
     }
 }

@@ -2,10 +2,7 @@ package shinobi.code.safely
 
 import android.app.Notification
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.*
 import android.util.Log
 import io.flutter.app.FlutterActivity
@@ -19,22 +16,37 @@ class MainActivity : FlutterActivity() {
         super.onCreate(savedInstanceState)
         GeneratedPluginRegistrant.registerWith(this)
 
-        MethodChannel(flutterView, CHANNEL).setMethodCallHandler{ call, result ->
+        MethodChannel(flutterView, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "sendSms") {
                 val number = call.argument<String>("phone")
                 val message = call.argument<String>("message")
-                val numberList = number?.split(',')
-                var sendCount = 0
-                numberList?.forEach {
-                    Thread.sleep(3000)
-                   sendCount += sendSms(it, message)
-                }
-                if (sendCount == numberList?.size) {
-                    result.success("success")
-                }else {
-                    result.error("Err", "Message not sent", "")
-                }
+                val numberList = number?.split(',') as ArrayList
 
+
+                if (!(number.isNullOrBlank() || message.isNullOrBlank())) {
+                    val intent = Intent(this, LocationService::class.java)
+                    val bundle = Bundle()
+                    bundle.putString("message", message)
+                    bundle.putStringArrayList("numbers", numberList)
+                    intent.putExtras(bundle)
+                    startService(intent)
+
+                    result.success("success")
+                    val handler = Handler()
+                    val runner = Runnable{
+                        stopService(intent)
+                    }
+                    handler.postDelayed(runner, 180_000)
+                } else {
+                    result.error("Err", "An error occurred!", "")
+                }
+            } else if(call.method == "persistContactsNatively"){
+                val number = call.argument<String>("phone")
+                val prefs = getPreferences(Context.MODE_PRIVATE)
+                val editor = prefs.edit()
+                editor.putString("numbers", number)
+                editor.apply()
+                result.success("success")
             }else {
                 result.notImplemented()
             }
@@ -43,24 +55,15 @@ class MainActivity : FlutterActivity() {
     }
 
 
-
-    companion object {
-        val CHANNEL = "io.safely.code.shinobi/sendSms"
-    }
-
-
-
     override fun onStop() {
         super.onStop()
         startService(Intent(this, TheService::class.java))
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        stopService(Intent(this, TheService::class.java))
-
+    companion object {
+        val CHANNEL = "io.safely.code.shinobi/sendSms"
     }
+
 }
 
 
@@ -69,9 +72,10 @@ class TheService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     lateinit var vibrator: Vibrator
 
-
     override fun onCreate() {
         super.onCreate()
+        Sensey.getInstance().init(applicationContext)
+        Log.e("Sensey_Instance", "Sensey Instance created in Service's onCreate()")
 
         val manager = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Sensor:WakeLogTag")
@@ -88,12 +92,12 @@ class TheService : Service() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 vibrator.vibrate(
                     VibrationEffect.createOneShot(
-                        1000,
+                        2000,
                         VibrationEffect.DEFAULT_AMPLITUDE
                     )
                 )
             else
-                vibrator.vibrate(1000)
+                vibrator.vibrate(2000)
         }
 
         override fun onShakeStopped() {
@@ -102,8 +106,11 @@ class TheService : Service() {
                 "Shaking has stopped. I think we can all agree that Sensey rocks!"
             )
             Sensey.getInstance().stopShakeDetection(this)
-//            startService(Intent(applicationContext, LocationService::class.java))
-
+            val intent = Intent(applicationContext, LocationService::class.java)
+            val prefs = getSharedPreferences("fromFlutter", Context.MODE_PRIVATE)
+            val numbers = prefs.getString("numbers", null)
+            intent.putExtra("nums", numbers)
+            startService(intent)
         }
     }
 
@@ -123,8 +130,6 @@ class TheService : Service() {
         super.onStartCommand(intent, flags, startId)
         startForeground(Process.myPid(), Notification())
         wakeLock?.acquire(100)
-        Sensey.getInstance().init(applicationContext)
-        Log.e("Sensey_Instance", "Sensey Instance created in onStartCommand()")
         return START_STICKY
     }
 
@@ -141,7 +146,7 @@ class TheService : Service() {
                 startService(Intent(applicationContext, TheService::class.java))
                 Log.e("SCREEN_OFF ::", "RUNNABLE STARTS NEXT! SERVICE HAS STARTED. ")
                 val runnable = Runnable {
-                    Sensey.getInstance().startShakeDetection(40f, 3000, shakeListener)
+                    Sensey.getInstance().startShakeDetection(20f, 1000, shakeListener)
 //                    Sensey.getInstance()
 //                     .startTouchTypeDetection(context, threeFingerSingleTapListener)
                 }
