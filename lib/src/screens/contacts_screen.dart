@@ -22,6 +22,8 @@ class ContactsPageState extends State<ContactsPage> {
 
   TextEditingController searchController = TextEditingController();
 
+  List<Contact> savedContacts;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -35,7 +37,33 @@ class ContactsPageState extends State<ContactsPage> {
       _isLoading = true;
     });
     var contacts = await ContactsService.getContacts(withThumbnails: false);
-    _populateContacts(contacts);
+    removeAlreadySelectedContacts(contacts);
+  }
+
+  removeAlreadySelectedContacts(Iterable<Contact> contacts) async {
+    var prefs = await SharedPreferences.getInstance();
+    var repo = PreferencesRepository(prefs, JsonCustomContactDesSer());
+    var contactList =
+        contacts.where((item) => item.displayName != null).toList();
+    var temp = repo.findAll();
+//    temp.forEach((temp) =>
+//      print(temp.contact.displayName)
+//    );
+    print("TEMP_EMPTY? ${temp.isNotEmpty}");
+
+    if (temp.isNotEmpty) {
+      temp.forEach((tem) {
+        for (int i = 0; i < contactList.length; i++) {
+          if (contactList[i].displayName.toLowerCase() ==
+              tem.contact.displayName.toLowerCase()) {
+                contactList.removeAt(i);
+                break;
+
+          }
+        }
+      });
+    }
+    _populateContacts(contactList);
   }
 
   Widget _buildSearchField() {
@@ -62,8 +90,8 @@ class ContactsPageState extends State<ContactsPage> {
     );
   }
 
-  void _populateContacts(Iterable<Contact> contacts) {
-    _contacts = contacts.where((item) => item.displayName != null).toList();
+  void _populateContacts(List<Contact> contacts) {
+    _contacts = contacts;
     _contacts.sort((a, b) => a.displayName.compareTo(b.displayName));
 
     _allContacts =
@@ -131,19 +159,17 @@ class ContactsPageState extends State<ContactsPage> {
         GestureDetector(
           onTap: () {
             if (!(selectedContacts.length >= 3)) {
-              final snackBar = SnackBar(
-                content: Text("Select at least 3 contacts"),
-                backgroundColor: Colors.blueGrey,
-              );
-              Scaffold.of(context).showSnackBar(snackBar);
+
             } else {
               updateSharedPrefs();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => HomeScreen()));
             }
           },
           child: Container(
             width: MediaQuery.of(context).size.width,
-            color: selectedContacts.length >= 3 ? Colors.amber : Colors.grey[850],
+            color:
+                selectedContacts.length >= 3 ? Colors.amber : Colors.grey[850],
             height: 50.0,
             child: Center(
               child: Text(
@@ -182,7 +208,6 @@ class ContactsPageState extends State<ContactsPage> {
               selectedContacts.add(customContact);
             } else {
               selectedContacts.remove(customContact);
-
             }
           });
         },
