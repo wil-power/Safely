@@ -36,7 +36,7 @@ class MainActivity : FlutterActivity() {
                     val runner = Runnable{
                         stopService(intent)
                     }
-                    handler.postDelayed(runner, 180_000)
+                    handler.postDelayed(runner, 60_000)
                 } else {
                     result.error("Err", "An error occurred!", "")
                 }
@@ -61,7 +61,7 @@ class MainActivity : FlutterActivity() {
     }
 
     companion object {
-        val CHANNEL = "io.safely.code.shinobi/sendSms"
+        val CHANNEL = "io.safely.code.shinobi/"
     }
 
 }
@@ -111,6 +111,11 @@ class TheService : Service() {
             val numbers = prefs.getString("numbers", null)
             intent.putExtra("nums", numbers)
             startService(intent)
+            val handler = Handler()
+            val runner = Runnable{
+                stopService(intent)
+            }
+            handler.postDelayed(runner, 60_000)
         }
     }
 
