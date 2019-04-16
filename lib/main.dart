@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'src/screens/home_screen.dart';
 import 'src/screens/splash_screen.dart';
-import 'src/screens/contacts_screen.dart';
+
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {

@@ -120,10 +120,4 @@ class ChosenContactsPageState extends State<ChosenContactsPage> {
       key: Key(customContact.contact.displayName),
     );
   }
-
-  Widget _buildSubtitle(List<Item> list) {
-    return list.length > 1 && list[0].value != null
-        ? Text(list[0].value)
-        : Text("");
-  }
 }

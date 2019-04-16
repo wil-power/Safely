@@ -24,8 +24,8 @@ class SplashScreenState extends State<SplashScreen> {
   void initState() {
     // set this screen as a full screen
     SystemChrome.setEnabledSystemUIOverlays([]);
-    super.initState();
     perm.requestPermissions();
+    super.initState();
     startTimer();
   }
 
