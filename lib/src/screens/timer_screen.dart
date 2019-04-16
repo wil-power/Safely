@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pref_dessert/pref_dessert.dart';
 import 'dart:math' as math;
 import 'package:safely/src/model/activity_information.dart';
+import 'package:safely/src/model/custom_contact.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TimerScreen extends StatefulWidget {
   final UserActivityInfo userActivityInfo;
@@ -17,8 +20,11 @@ class _TimerScreenState extends State<TimerScreen>
   AnimationController animationController;
   Animation animation;
 
-  static const platform = const MethodChannel('io.safely.code.shinobi/sendSms');
+  static const platform = const MethodChannel('io.safely.code.shinobi/');
   int repeatCount = 0;
+
+  String numbers;
+
 
   String get timerString {
     Duration duration =
@@ -51,8 +57,27 @@ class _TimerScreenState extends State<TimerScreen>
               startCountDown();
             }
           });
-
+    retrieveSavedContacts();
     startCountDown();
+  }
+
+  retrieveSavedContacts() async {
+    var prefs = await SharedPreferences.getInstance();
+    var repo = PreferencesRepository(prefs, JsonCustomContactDesSer());
+    var temp = repo.findAll();
+    List holder = [];
+
+    temp.forEach((tem) {
+      print("Inside forEach()");
+      setState(() {
+        var num = tem.contact.phones.toList();
+        var tempo = num[0].value;
+
+        holder.add(tempo);
+        numbers = holder.join(",");
+      });
+    });
+
   }
 
   @override
@@ -63,10 +88,9 @@ class _TimerScreenState extends State<TimerScreen>
 
   void sendingSms() async {
     await platform.invokeMethod("sendSms", <String, dynamic>{
-      "phone": "+233552212443,+233209050642,+233554021947",
+      "phone": numbers,
       "message": "The school dier we go finish am. Sent with love, Safely."
     });
-
   }
 
   @override

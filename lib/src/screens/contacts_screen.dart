@@ -1,11 +1,11 @@
+
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:pref_dessert/pref_dessert.dart';
 import 'package:safely/src/model/custom_contact.dart';
-import 'package:safely/src/misc/permissions.dart' as perm;
+
 import 'package:safely/src/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'chosen_contacts_screen.dart';
 
 class ContactsPage extends StatefulWidget {
   @override
@@ -23,12 +23,17 @@ class ContactsPageState extends State<ContactsPage> {
   TextEditingController searchController = TextEditingController();
 
   List<Contact> savedContacts;
+  String filter;
 
   @override
   void initState() {
     // TODO: implement initState
-    perm.requestPermissions();
     refreshContacts();
+    searchController.addListener(() {
+      setState(() {
+        filter = searchController.text;
+      });
+    });
     super.initState();
   }
 
@@ -52,9 +57,8 @@ class ContactsPageState extends State<ContactsPage> {
         for (int i = 0; i < contactList.length; i++) {
           if (contactList[i].displayName.toLowerCase() ==
               tem.contact.displayName.toLowerCase()) {
-                contactList.removeAt(i);
-                break;
-
+            contactList.removeAt(i);
+            break;
           }
         }
       });
@@ -69,9 +73,6 @@ class ContactsPageState extends State<ContactsPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              onChanged: (value) {
-                filterSearchResults(value);
-              },
               controller: searchController,
               decoration: InputDecoration(
                   labelText: "Search Contacts",
@@ -102,15 +103,7 @@ class ContactsPageState extends State<ContactsPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        body: !_isLoading
-            ? buildContactsUI()
-            : Center(
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.black54,
-                ),
-              ),
-      ),
+      child: Scaffold(body: buildContactsUI()),
     );
   }
 
@@ -148,14 +141,68 @@ class ContactsPageState extends State<ContactsPage> {
               CustomContact _contact = _uiCustomContacts[index];
               var _phonesList = _contact.contact.phones.toList();
 
-              return _buildListTile(_contact, _phonesList);
+              return filter == null || filter == ""
+                  ? ListTile(
+                      leading: CircleAvatar(
+                        child: Text(
+                            _contact.contact.displayName[0].toUpperCase(),
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                      trailing: Checkbox(
+                        activeColor: Colors.green,
+                        value: _contact.isChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            _contact.isChecked = value;
+                            if (_contact.isChecked) {
+                              selectedContacts.add(_contact);
+                            } else {
+                              selectedContacts.remove(_contact);
+                            }
+                          });
+                        },
+                      ),
+                      title: Text(_contact.contact.displayName ?? ""),
+                      subtitle: _phonesList.length >= 1 &&
+                              _phonesList[0]?.value != null
+                          ? Text(_phonesList[0].value)
+                          : Text(''),
+                    )
+                  : '${_contact.contact.displayName.toLowerCase()}'
+                          .contains(filter.toLowerCase())
+                      ? ListTile(
+                          leading: CircleAvatar(
+                            child: Text(
+                                _contact.contact.displayName[0].toUpperCase(),
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                          trailing: Checkbox(
+                            activeColor: Colors.green,
+                            value: _contact.isChecked,
+                            onChanged: (value) {
+                              setState(() {
+                                _contact.isChecked = value;
+                                if (_contact.isChecked) {
+                                  selectedContacts.add(_contact);
+                                } else {
+                                  selectedContacts.remove(_contact);
+                                }
+                              });
+                            },
+                          ),
+                          title: Text(_contact.contact.displayName ?? ""),
+                          subtitle: _phonesList.length >= 1 &&
+                                  _phonesList[0]?.value != null
+                              ? Text(_phonesList[0].value)
+                              : Text(''),
+                        )
+                      : Container();
             },
           ),
         ),
         GestureDetector(
           onTap: () {
             if (!(selectedContacts.length >= 3)) {
-
             } else {
               updateSharedPrefs();
               Navigator.push(context,
@@ -183,7 +230,7 @@ class ContactsPageState extends State<ContactsPage> {
   }
 
   ListTile _buildListTile(CustomContact customContact, List<Item> list) {
-    return ListTile(
+    ListTile(
       leading: CircleAvatar(
         child: Text(
           (customContact.contact.displayName[0].toUpperCase()),
