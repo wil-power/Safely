@@ -9,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ChosenContactsPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return ChosenContactsPageState();
   }
 }
@@ -19,7 +18,7 @@ class ChosenContactsPageState extends State<ChosenContactsPage> {
 
   retrieveSavedContacts() async {
     var prefs = await SharedPreferences.getInstance();
-    var repo = PreferencesRepository(prefs, JsonCustomContactDesSer());
+    var repo = PreferencesRepository<CustomContact>(prefs, JsonCustomContactDesSer());
     var temp = repo.findAll();
     temp.forEach((tem) {
       setState(() {

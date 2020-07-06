@@ -202,7 +202,7 @@ class ContactsPageState extends State<ContactsPage> {
         ),
         GestureDetector(
           onTap: () {
-            if (!(selectedContacts.length >= 3)) {
+            if (!(selectedContacts.length >= 1)) {
             } else {
               updateSharedPrefs();
               Navigator.push(context,
