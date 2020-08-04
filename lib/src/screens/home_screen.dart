@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen>
   String selected;
   String durationSelected = "Select duration";
   String userActivity = "Choose activity";
+  String activityDetail = "Emergency";
 
 //  String chooseActivityLabel = displayActivityLabel ? "Choose Activity" : "";
 //  static bool displayActivityLabel = false;
@@ -76,6 +77,9 @@ class _HomeScreenState extends State<HomeScreen>
               hintText: "What are you wearing? Are you picking a taxi? etc.",
               border: OutlineInputBorder(),
             ),
+            onChanged: (text) {
+                  activityDetail = text;
+  },
           ),
         ),
         SizedBox(
@@ -222,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen>
             (hours != null && minutes != null)) {
           var infoObj = UserActivityInfo(
               activityTitle: userActivity,
-              duration: Duration(hours: hours, minutes: minutes));
+              duration: Duration(hours: hours, minutes: minutes),
+          detail: activityDetail,);
 
           Navigator.push(
             context,

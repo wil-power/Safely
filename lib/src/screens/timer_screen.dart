@@ -88,7 +88,7 @@ class _TimerScreenState extends State<TimerScreen>
   void sendingSms() async {
     await platform.invokeMethod("sendSms", <String, dynamic>{
       "phone": numbers,
-      "message": "Emergency"
+      "message": "${widget.userActivityInfo.activityTitle}\n${widget.userActivityInfo.detail}"
     });
   }
 
