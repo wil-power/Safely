@@ -99,8 +99,9 @@ class TheService : Service() {
                     .setPriority(NotificationManager.IMPORTANCE_HIGH)
                     .setCategory(Notification.CATEGORY_SERVICE)
                     .build()
+            return notification
         } else {
-            Notification()
+            return Notification()
         }
     }
 
