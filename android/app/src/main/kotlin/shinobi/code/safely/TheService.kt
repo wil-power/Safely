@@ -86,14 +86,15 @@ class TheService : Service() {
 
     private fun getSafelyNotification(): Notification {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val chan = NotificationChannel(MainActivity.CHANNEL, "Safely", NotificationManager.IMPORTANCE_HIGH)
+            val chan = NotificationChannel("com.shinobi.safely", "Safely", NotificationManager.IMPORTANCE_HIGH)
+            chan.description = "Safely notifications"
             val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             if (mNotificationManager.getNotificationChannel(MainActivity.CHANNEL) == null) {
                 mNotificationManager.createNotificationChannel(chan)
             }
-            chan.description = "Safely notifications"
-            val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(applicationContext, "com.shinobi.safely")
-            notificationBuilder.setOngoing(true)
+            val notificationBuilder: NotificationCompat.Builder = NotificationCompat
+                    .Builder(applicationContext, "com.shinobi.safely")
+            val notification = notificationBuilder.setOngoing(true)
                     .setContentTitle("Safely")
                     .setPriority(NotificationManager.IMPORTANCE_HIGH)
                     .setCategory(Notification.CATEGORY_SERVICE)
